@@ -174,6 +174,8 @@ class TLSSyslogReceiver:
                 try:
                     sock.close()
                 except Exception:
+                    # Ignore exceptions when closing sockets during shutdown,
+                    # as the socket may already be closed or in an invalid state.
                     pass
 
 
