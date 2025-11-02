@@ -1,6 +1,6 @@
 import logging
 import re
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Dict, Pattern
 
 logging.basicConfig(
@@ -95,7 +95,7 @@ class SyslogParser:
                     'severity': cls.SEVERITY_MAP.get(pri & 0x07, 'unknown'),
                     'message': pri_match.group(2),
                     'raw': message,
-                    'timestamp': datetime.utcnow().isoformat()
+                    'timestamp': datetime.now(timezone.utc).isoformat()
                 }
             
             return {
@@ -104,7 +104,7 @@ class SyslogParser:
                 'severity': 'notice',
                 'message': message,
                 'raw': message,
-                'timestamp': datetime.utcnow().isoformat()
+                'timestamp': datetime.now(timezone.utc).isoformat()
             }
             
         except Exception as e:
@@ -116,7 +116,7 @@ class SyslogParser:
                 'message': message,
                 'raw': message,
                 'parse_error': str(e),
-                'timestamp': datetime.utcnow().isoformat()
+                'timestamp': datetime.now(timezone.utc).isoformat()
             }
     
     @classmethod
