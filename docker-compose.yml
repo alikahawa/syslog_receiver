@@ -1,0 +1,27 @@
+services:
+  syslog-receiver:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: syslog-receiver
+    ports:
+      - "514:514/udp" # UDP syslog
+      - "6514:6514/tcp" # TLS syslog
+    volumes:
+      - ./logs:/app/logs
+      - ./certs:/app/certs:ro # Mount certificates if you have them
+    environment:
+      - SYSLOG_UDP_PORT=514
+      - SYSLOG_TLS_PORT=6514
+      - SYSLOG_LOG_DIR=/app/logs
+      - SYSLOG_CERT_FILE=/app/certs/cert.pem
+      - SYSLOG_KEY_FILE=/app/certs/key.pem
+      - SYSLOG_ENABLE_UDP=true
+      - SYSLOG_ENABLE_TLS=true
+    restart: unless-stopped
+    networks:
+      - syslog-network
+
+networks:
+  syslog-network:
+    driver: bridge
