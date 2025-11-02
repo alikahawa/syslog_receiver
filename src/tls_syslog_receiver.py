@@ -124,8 +124,8 @@ class TLSSyslogReceiver:
         finally:
             try:
                 sock.close()
-            except Exception:
-                pass
+            except Exception as e:
+                logger.debug(f"Exception occurred while closing socket for {addr}: {e}")
             logger.info(f"Connection handler for {addr} terminated")
  
     def _process_message(self, message: str, source_ip: str) -> None:
