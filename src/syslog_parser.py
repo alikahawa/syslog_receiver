@@ -76,6 +76,11 @@ class SyslogParser:
         try to match with RFC5424 or RFC3164
         If that does not work, treat the message as plain message
         and get as much information as possible
+
+            pri >> 3 → Right shift by 3 bits
+        This extracts the facility portion.
+            pri & 0x07 → Bitwise AND with 7 (binary 111)
+        This extracts the severity portion (last 3 bits).
         """
         try:
             match = cls.RFC5424_PATTERN.match(message)

@@ -17,6 +17,24 @@ class UDPSyslogReceiver:
     
     def __init__(self, host: str = '0.0.0.0', port: int = 514, 
                  writer: Optional[object] = None, deduplicator: Optional[object] = None) -> None:
+        """
+        Initialize UDP syslog receiver.
+        
+        Args:
+            host: Interface to bind to
+                  - '0.0.0.0' = All interfaces (default, required for containers)
+                  - '127.0.0.1' = Localhost only (development)
+                  - Specific IP = Single interface (production on bare metal)
+            port: UDP port to listen on (default: 514)
+            writer: Optional SyslogWriter instance
+            deduplicator: Optional deduplicator instance
+        
+        Security Note:
+            When using 0.0.0.0 (all interfaces), ensure proper firewall rules
+            or security groups are configured to restrict access to trusted sources.
+            In containerized environments (Docker/ECS), this is typically handled
+            by the orchestration platform's network policies.
+        """
         self.host: str = host
         self.port: int = port
         self.writer: Optional[object] = writer
