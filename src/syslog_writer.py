@@ -34,7 +34,7 @@ class SyslogWriter:
     
     def write(self, parsed_message: Dict[str, Any]) -> None:
         """Write parsed syslog message to appropriate log file"""
-        severity = parsed_message.get('severity', 'info')
+        severity = parsed_message.get('severity', 'debug')
         filename = self.severity_files.get(severity, 'unknown.log')
         filepath = self.log_dir / filename
         
@@ -48,7 +48,10 @@ class SyslogWriter:
                 logger.error(f"Error writing to {filename}: {e}")
     
     def close(self) -> None:
-        """Close all open file handles"""
+        """
+        Close all open file handles
+        Check!
+        """
         with self.lock:
             for handle in self.file_handles.values():
                 try:
