@@ -225,3 +225,73 @@ Syslog Source (rsyslog/syslog-ng)
          v
    Log Files (JSON)
 ```
+
+
+# Explinations
+
+## OctetCountingReader
+
+### What is Octet-Counting? (RFC 6587)
+Octet-counting is a framing method for syslog messages transmitted over TCP/TLS.
+It solves a fundamental problem: "Where does one message end and the next begin?"
+`Message1Message2Message3...`
+
+TCP is a byte stream protocol - there are no message boundaries!
+When syslog is sent over TCP, messages are part of a continuous stream:
+
+```
+Send:     "Hello" + "World"
+Receive:  "Hel"   "loWor"   "ld"    (TCP can split anywhere!)
+```
+
+We need a way to tell where each message starts/ends.
+
+We have two Framing Methods
+1. Method 1: Newline Delimiter (Traditional): it is Simple, but if message contains \n? Message gets split!
+2. Method 2: Octet-Counting (RFC 6587). Format: <length><space><message>
+    - Count the exact number of bytes in the message
+    - Prefix the message with: length + space
+    - Send: length<space>message
+    - As a result: we know exactly how many bytes to read!
+
+Anatomy of a Frame in Octect-Counting:
+
+```bash
+48 <34>Oct 11 22:14:15 server app: Hello World
+│  │└────────────────────────────────────────┘
+│  │              48 bytes 
+│  └─ Space (delimiter)
+└─ Length prefix (ASCII digits)
+```
+
+### Example:
+
+We get the following input:
+
+```python3
+data = b'48 <34>Oct 11 22:14:15 server app: Hello World'
+reader.feed(data)
+```
+
+First we buffer the incoming data since TCP might deliver the data as chuncks, after that we check the buffer size limit.
+Then we look for the space index so that we can process the message and read its length. 
+
+```bash
+b'48 <34>Oct 11 22:14:15 server app: Hello World'
+  ↑
+  Position 2 (space_idx)
+```
+
+We then extract the length of the data:
+
+```bash
+b'48 <34>Oct 11 22:14:15 server app: Hello World'
+ ↑↑
+ Extract these 2 bytes → '48'
+```
+
+From here, we check the message in the rest of the buffer since we now know the length of the message, if a message is incomplete we handle it as a partial frame.
+After that we continue to the next one in the while loop.
+We also do validate the buffers to ensure that the length of the message or the size of the buffer does not exceed the predefind size to protect against memory attacks.
+
+
