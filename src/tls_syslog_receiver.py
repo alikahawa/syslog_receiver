@@ -6,8 +6,8 @@ import threading
 from datetime import datetime, timezone
 from typing import List, Optional, Tuple
 
-from octet_counting_reader import OctetCountingReader
-from syslog_parser import SyslogParser
+from .octet_counting_reader import OctetCountingReader
+from .syslog_parser import SyslogParser
 
 logging.basicConfig(
     level=logging.INFO,
