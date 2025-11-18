@@ -10,6 +10,12 @@ __pycache__/
 *.egg-info/
 dist/
 build/
+.env
+*.env
+.myenv/
+*.myenv/
+.coverage
+htmlcov/
 
 .qodo/
 
@@ -36,5 +42,3 @@ terraform/terraform.tfvars
 .DS_Store
 Thumbs.db
 
-# Docker
-.dockerignore

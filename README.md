@@ -295,3 +295,95 @@ After that we continue to the next one in the while loop.
 We also do validate the buffers to ensure that the length of the message or the size of the buffer does not exceed the predefind size to protect against memory attacks.
 
 
+
+# Tests
+## Test Pyramid Structure
+
+```
+                    ▲
+                   / \
+                  /   \
+                 /     \
+                /       \
+               /  E2E    \         13 tests (~30s)
+              / Scenarios \       Production simulations
+             /_____________\
+            /               \
+           /  Integration    \     11 tests (~10s)
+          /    Tests          \    UDP/TLS receivers
+         /___________________  \
+        /                       \
+       /       Unit Tests        \   48 tests (~2s)
+      /   Parser, Writer, Dedup   \  Fast, isolated
+     /_____________________________\
+
+Total: 72 tests
+```
+
+## Running Tests
+
+### Prerequisites
+
+```bash
+# Install test dependencies
+pip install -r requirements.txt
+
+# Or install just pytest
+pip install pytest pytest-cov pytest-timeout pytest-xdist
+```
+
+### Basic Test Execution
+
+```bash
+# Run all tests
+pytest
+
+# Run with verbose output
+pytest -v
+
+# Run specific test file
+pytest tests/test_syslog_parser.py
+
+# Run specific test class
+pytest tests/test_integration.py::TestUDPReceiverIntegration
+
+# Run specific test method
+pytest tests/test_syslog_parser.py::TestSyslogParserRFC3164::test_parse_all_severity_levels
+```
+
+### Test Categories with Markers
+
+```bash
+# Run only unit tests (fast)
+pytest -m unit
+
+# Run only integration tests
+pytest -m integration
+
+# Run only scenario tests
+pytest -m scenario
+
+# Exclude slow tests
+pytest -m "not slow"
+```
+
+### Coverage Reports
+
+```bash
+# Run tests with coverage
+pytest --cov=src --cov-report=html
+
+# View coverage report
+open htmlcov/index.html  # macOS
+xdg-open htmlcov/index.html  # Linux
+
+# Generate terminal coverage report
+pytest --cov=src --cov-report=term-missing
+```
+
+
+# What's next?
+- Metrics & Monitoring - Add Prometheus endpoint for observability
+- REST API - For configuration, stats, and modern log ingestion
+- Message Enrichment - GeoIP, DNS lookups
+- Streaming Output - Kafka/Kinesis for real-time processing
