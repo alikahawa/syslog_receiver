@@ -140,7 +140,7 @@ class TLSSyslogReceiver:
         
         # Add source IP to parsed data
         parsed['source_ip'] = source_ip
-        parsed['received_at'] = datetime.utcnow().isoformat()
+        parsed['received_at'] = datetime.now(timezone.utc).isoformat()
         
         # Write to file
         if self.writer:
