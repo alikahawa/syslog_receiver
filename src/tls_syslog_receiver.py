@@ -3,7 +3,7 @@ import select
 import socket
 import ssl
 import threading
-from datetime import datetime, timezone
+from datetime import datetime
 from typing import List, Optional, Tuple
 
 from .octet_counting_reader import OctetCountingReader
@@ -43,13 +43,12 @@ class TLSSyslogReceiver:
             context.load_cert_chain(self.cert_file, self.key_file)
         except FileNotFoundError:
             logger.warning(f"Certificate files not found at {self.cert_file}. Generating self-signed certificate...")
-            # Generate in writable location (/app) if original path is not writable
-            writable_cert = '/app/cert.pem'
-            writable_key = '/app/key.pem'
-            self._generate_self_signed_cert(writable_cert, writable_key)
-            # Update paths to use generated certs
-            self.cert_file = writable_cert
-            self.key_file = writable_key
+            # Generate in same directory as requested cert file
+            import os
+            cert_dir = os.path.dirname(self.cert_file) or '.'
+            os.makedirs(cert_dir, exist_ok=True)
+            self._generate_self_signed_cert(self.cert_file, self.key_file)
+            # Paths are already correct, load the certs
             context.load_cert_chain(self.cert_file, self.key_file)
         
         # Create socket
@@ -124,8 +123,8 @@ class TLSSyslogReceiver:
         finally:
             try:
                 sock.close()
-            except Exception as e:
-                logger.debug(f"Exception occurred while closing socket for {addr}: {e}")
+            except Exception:
+                pass
             logger.info(f"Connection handler for {addr} terminated")
  
     def _process_message(self, message: str, source_ip: str) -> None:
@@ -141,7 +140,7 @@ class TLSSyslogReceiver:
         
         # Add source IP to parsed data
         parsed['source_ip'] = source_ip
-        parsed['received_at'] = datetime.now(timezone.utc).isoformat()
+        parsed['received_at'] = datetime.utcnow().isoformat()
         
         # Write to file
         if self.writer:
@@ -174,8 +173,6 @@ class TLSSyslogReceiver:
                 try:
                     sock.close()
                 except Exception:
-                    # Ignore exceptions when closing sockets during shutdown,
-                    # as the socket may already be closed or in an invalid state.
                     pass
 
 

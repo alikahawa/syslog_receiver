@@ -3,7 +3,7 @@ import socket
 from datetime import datetime
 from typing import Optional
 
-from syslog_parser import SyslogParser
+from .syslog_parser import SyslogParser
 
 logging.basicConfig(
     level=logging.INFO,
